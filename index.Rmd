@@ -1,0 +1,31 @@
+---
+title: "Visualización avanzada para análisis de correspondencias con R"
+author: "Emilio López cano"
+date: "2019-05-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Preparando el entorno
+---------------------
+
+Descarga e instala R y RStudio en tu sistema, y en ese orden. Puedes encontrar
+las instrucciones y los archivos de instalación en las siguientes direcciones:
+
+- http://www.r-project.org
+
+- http://www.rstudio.com
+
+
+Después de instalar R y RStudio, descarga y descomprime el siguiente fichero, que contiene
+el proyecto de RStudio que usaremos en esta sesión:
+
+
+Abre el proyecto de RStudio en tu equipo. Descomprime el fichero de datos:
+
+```{r eval=FALSE}
+unzip("datos.zip")
+```
