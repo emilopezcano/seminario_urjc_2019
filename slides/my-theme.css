@@ -1,0 +1,235 @@
+@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+@import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700);
+
+body { font-family: 'Droid Serif', 'Palatino Linotype', 'Book Antiqua', Palatino, 'Microsoft YaHei', 'Songti SC', serif; }
+h1, h2, h3 {
+  font-family: 'Yanone Kaffeesatz';
+  font-weight: normal;
+}
+a, a > code {
+  color: rgb(249, 38, 114);
+  text-decoration: none;
+}
+.footnote {
+  position: absolute;
+  bottom: 3em;
+  padding-right: 4em;
+  font-size: 90%;
+}
+.remark-code, .remark-inline-code { font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace; }
+.remark-code-line-highlighted     { background-color: #ffff88; }
+
+.inverse {
+  background-color: #272822;
+  color: #d6d6d6;
+  text-shadow: 0 0 20px #333;
+}
+.inverse h1, .inverse h2, .inverse h3 {
+  color: #f3f3f3;
+  line-height: 1.0em;
+}
+/* Two-column layout */
+.left-column {
+  color: #777;
+  width: 20%;
+  height: 92%;
+  float: left;
+}
+.left-column h2:last-of-type, .left-column h3:last-child {
+  color: #000;
+}
+.right-column {
+  width: 75%;
+  float: right;
+  padding-top: 1em;
+}
+.pull-left {
+  float: left;
+  width: 47%;
+}
+.pull-right {
+  float: right;
+  width: 47%;
+}
+.pull-right ~ * {
+  clear: both;
+}
+img {
+  max-width: 100%;
+}
+blockquote {
+  border-left: solid 5px lightgray;
+  padding-left: 1em;
+}
+
+.toc li {
+  font-size:1.5em;
+  margin-bottom:15px;
+}
+
+.toc {
+  background-color: #555555;
+  color: #eeeeee;
+  text-shadow: 0 0 20px #333;
+}
+
+.practice {
+  background-color: #cccccc;
+  color: #555555;
+  text-shadow: 0 0 20px #cccccc;
+}
+
+
+.large { font-size: 150% }
+.huge { font-size: 200% }
+
+.remark-slide-number {
+  display: none;
+}
+
+.imgwpeque img{
+  max-width:100px;
+  max-height:100px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+.imgwpeque2 img{
+  max-width:50px;
+  max-height:50px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+
+.imgw150 img{
+  max-width:150px;
+  max-height:150px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+.imgw175 img{
+  max-width:175px;
+  max-height:175px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+.imgw200 img{
+  max-width:200px;
+  max-height:200px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+.imgw200 img{
+  max-width:400px;
+  max-height:400px;
+  width: auto;
+  height: auto;
+}
+.imgw300 img{
+  max-width:300px;
+  max-height:300px;
+  width: auto;
+  height: auto;
+}
+
+.imgremate img{
+  max-width:150px;
+  max-height:150px;
+  width: auto;
+  height: auto;
+  float: right;
+  position: relative;
+  bottom: 120px;
+  right: -75px;
+}
+
+.iconocreditos img{
+  max-width:75px;
+  max-height:75px;
+  width: auto;
+  height: auto;
+  padding-right: 15px;
+}
+
+
+.centro {
+  text-align: center;
+}
+
+.idea {
+  text-align: center;
+  display: block;
+}
+
+.idea img{
+  margin-right: 10px;
+  width: 40px;
+}
+
+.centro2 {
+  text-align: center;
+  margin-top: 20px;
+}
+
+blockquote > p:last-child {
+  text-align: right;
+}
+blockquote > p:first-child {
+  text-align: inherit;
+}
+
+.topm200 {
+  margin-top: 200px;
+}
+.topm100 {
+  margin-top: 100px;
+}
+.topm50 {
+  margin-top: 50px;
+}
+
+.red {
+  color: #E6135F;
+}
+
+.blue {
+  color: #008cff;
+}
+
+.small {
+  margin-top: 15px;
+  font-size: 80%;
+}
+
+.centro img {
+  display: block;
+  margin: 0 auto;
+}
+
+table {
+  margin: auto;
+  border-top: 1px solid #666;
+  border-bottom: 1px solid #666;
+}
+table thead th { border-bottom: 1px solid #ddd; }
+th, td { padding: 5px; }
+thead, tfoot, tr:nth-child(even) { background: #eee }
+
+.poolv{
+  position: absolute;
+  left: 5px;
+  top: 150px;
+  padding-right:200px;
+  width:100px;
+}
+
+.title-slide {
+  background-image: url(img/pool_logos.png);
+  background-position: 50% 98%;
+  background-size: 35%;
+}

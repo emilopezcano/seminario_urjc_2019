@@ -1,0 +1,580 @@
+---
+title: "Análisis de correspondencias con R: aplicación a datos de encuestas"
+subtitle: "II Seminario Análisis de datos avanzados<br/>en Ciencias de la Salud"
+author: "Emilio López Cano"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: my-theme.css
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+slide <- TRUE
+```
+
+background-image: url(./img/emilio.png)
+background-size: 120px
+background-position: 95% 6%
+
+# Emilio L. Cano
+
+- Profesor contratado doctor en la  **Universidad de Castilla-La Mancha**
+
+- Profesor colaborador en la **Universidad Rey Juan Carlos**
+
+- Investigador en el **Instituto de Desarrollo Regional (IDR)** 
+
+- Sección **Métodos cuantitativos y desarrollo socioeconómico (MECYDES)** del IDR
+
+- **Grupo de Investigación en Técnicas Estadísticas y de Clasificación Aplicadas (GITECA)** de la UCLM
+
+- Formador en la Asociación Española para la Calidad (AEC) y miembro del subcomité técnico de normalización UNE-CTN66/SC3
+
+.small[
+.blue[**Formación académica**]: Doctor y Master en Ingeniería de Sistemas de Decisión (URJC), Graduado en Estadística Aplicada (Universidad Complutense)  
+.blue[**Cursos**] (sel.): IRYCIS, TetraPak, BSH, Lactalis, Nutreco, Carbures, Berlys, Deutz, ...  
+.blue[**Experiencia**]: Distribución, consultoría, promoción inmobiliaria, investigación y docencia
+
+.alfondo[.centro[emilio.lcano@uclm.es | http://blog.uclm.es/emiliolcano | +34 665 676 225]]
+]
+
+.poolv[![](./img/pool_logos_v.png)]
+
+???
+
+Emilio is a Statistitian that serves as associate professor at the University of Castilla-La Mancha in Spain, doing his research within the Quantitative Methods and Socio-economic Development section at the Institute for Regional Development, and within the Research group on Applied Statistical and Classification Techniques. He also contributes to the Spanish Association for Quality and to UNE, the Spanish member of ISO.
+
+---
+
+class: middle, toc
+
+# Contenidos
+
+1. Introducción al análisis de correspondencias
+
+2. Asociación entre atributos
+
+3. Análisis de correspondencias simple
+
+4. Análisis de correspondencias múltiple
+
+
+???
+
+
+
+
+---
+
+class: middle, center, toc
+
+# Introducción al análisis de correspondencias
+
+???
+
+
+---
+
+class: large
+
+# Análisis de correspondencias
+
+- Técnica de Interdependencias
+
+- Para variables cualitativas
+
+- Relacionamos niveles de atributos
+
+- Reducción de la dimensión (ideal 2)
+
+--
+  
+- Representación de tablas de contingencia
+
+- Datos originales:
+    - La tabla de contingencia, o
+    - Tabla de datos:
+        - Una fila por individuo
+        - Dos columnas: una para cada atributo
+        - La categoría del atributo en cada celda
+
+???
+
+---
+
+
+# Tabla de datos (ejemplo)
+
+```{r, echo=FALSE}
+N <- 12
+ncat <- 3
+d <- data.frame(A = sample(paste0("A", 1:ncat), N, replace = TRUE), 
+           B = sample(paste0("B", 1:ncat), N, replace = TRUE),
+           row.names = paste("individuo", 1:N))
+
+pander::pander(d, style="rmarkdown")
+```
+
+
+---
+
+class: large
+
+# Tabla de contingencia
+
+```{r , echo = FALSE}
+m <- data.frame(`A\\B`= c("$A_1$", "$A_2$", ""),
+                `$B_1$` = c("$n_{11}$", "$n_{21}$", "$n_{\\bullet 1}$"),
+                `$B_2$` = c("$n_{12}$", "$n_{22}$", "$n_{\\bullet 2}$"),
+                `$B_3$` = c("$n_{13}$", "$n_{23}$", "$n_{\\bullet 3}$"),
+                `_` = c("$n_{1\\bullet}$", "$n_{2\\bullet}$", "$N$")
+       # , dimnames = list(c("$A_1$", "$A_2$", ""),
+       #                   c("$B_1$", "$B_2$", ""))
+       )
+colnames(m) <- c("A\\B", "$B_1$", "$B_2$", "$B_3$", "")
+
+pander::pander(m, style = "rmarkdown")
+# knitr::kable(m, format = "html", escape = TRUE)
+#library(xtable)
+#print.xtable(xtable(m), type = "html")
+```
+
+--
+
+- Frecuencias absolutas conjuntas
+
+- Dos atributos $A$ y $B$ con dos y tres niveles $A_1, A_2$ y $B_1, B_2, B_3$
+
+- $n_{ij}$ número de observaciones en nivel $i$ de
+$A$ y nivel $j$ de $B$
+- $n_{i\bullet}$ y $n_{\bullet j}$ frecuencias marginales 
+- $N$ el número total de observaciones, o $n_{\bullet\bullet}$.
+
+
+
+???
+
+
+---
+
+# Tabla de contingencia - ejemplo
+
+```{r, echo=FALSE}
+tf <- addmargins(xtabs(data = d))
+pander::pander(tf, style = "rmarkdown")
+```
+
+
+---
+
+class: middle, center, toc
+
+# Asociación entre atributos
+
+???
+
+
+---
+
+class: large
+
+# Asociación entre atributos
+
+- Antes de intentar representar la relación entre atributos,
+debemos confirmar que existe tal relación
+
+- Sobre los datos observados, podemos calcular un estadístico
+que mida el grado de relación entre los atributos, en concreto
+el coeficiente de contingencia chi-cuadrado.
+
+- Para ello se utiliza el contraste de hipótesis basado
+en el coeficiente de contingencia **Chi-cuadrado**
+  
+
+
+???
+
+
+---
+
+class: large
+
+# Independencia de variables
+
+- Recordemos la definición de independencia basada en tablas de frecuencias
+
+- Dos variables, en este caso atributos, son independientes si las
+frecuencias relativas conjuntas son igual al producto de las 
+frecuencias marginales
+
+$$f_{ij} = \frac{n_{ij}}{N}= \frac{n_{i \bullet }}{N} \cdot \frac{n_{\bullet j}}{N} = f_{i \bullet } \cdot f_{\bullet j} \quad \forall i, j$$
+  
+
+???
+
+
+---
+
+class: large
+
+# Frecuencias esperadas
+
+- Bajo condiciones de independencia, esperaríamos las frecuencias conjuntas:
+  
+$$\frac{n_{ij}}{N}= \frac{n_{i \bullet }}{N} \cdot \frac{n_{\bullet j}}{N} \implies E_{ij} = \frac{n_{i \bullet }\cdot n_{\bullet j}}{N}$$
+
+--
+  
+- Es decir, producto de las frecuencias absolutas marginales dividido por la frecuencia total $N$
+
+???
+
+
+---
+
+class: large
+
+# Coeficiente de contingencia Chi-cuadrado
+
+- El siguiente estadístico:
+  
+$$\chi^2 = \sum\limits_i\sum\limits_j\frac{(n_{ij} - E_{ij})^2}{E_{ij}}$$
+
+--
+
+- Valdrá cero en caso de independencia
+
+- A mayor coeficiente, mayor grado de asociación
+
+
+???
+
+---
+
+class: large
+
+# Contraste Chi-cuadrado
+
+$H_0:$ No hay relación entre los atributos
+
+$H_1:$ Hay relación entre los atributos
+
+$$\chi^2 \leadsto \chi^2_{(r-1)\cdot (c-1)}$$
+  
+- Se compara con su distribución teórica
+
+- O se interpreta el p-valor
+
+- Limitaciones: $N \geq 20$ y $E_{ij}\geq 5$
+
+???
+
+
+---
+
+class: large, bottom, center, practice
+background-image: url(img/practice.png)
+background-position: 50% -10%
+background-size: 60%
+
+# Práctica
+
+Sigue el guión del material descargado de github
+
+
+
+
+---
+
+class: middle, center, toc
+
+# Análisis de correspondencias simple
+
+???
+
+
+---
+
+class: large
+
+# Análisis de correspondencias paso a paso
+
+- Determinamos coordenadas para cada categoría de atributo
+
+- Mediante distancias
+
+- Usamos la distancia chi-cuadrado
+
+- Representamos en eje de coordenadas
+
+- Se llama mapa perceptual
+
+--
+
+.centro2[.imgwpeque2[![image](./img/idea.png)]]
+El número de filas tiene que ser menor que el número de columnas
+
+
+???
+
+
+---
+
+class: large
+
+# Perfiles fila
+
+- Perfiles: frecuencias relativas condicionadas (a la fila o columna)
+
+- Elementos perfil fila:
+  
+$$p_{ik} = \frac{n_{ik}}{n_{i \bullet }}=\frac{n_{ik}}{\sum\limits_{j=1}^c n_{ij}}, \quad k = 1, \ldots, r$$  
+
+- Perfil fila:
+  
+$$\left( \begin{array}{cccc}p_{i1}& p_{i2}& \ldots& p_{ic}\end{array}\right)$$
+
+
+???
+
+
+---
+
+class: large
+
+# Perfiles columna
+
+
+- Elementos perfil columna:
+  
+$$p_{kj} = \frac{n_{kj}}{n_{\bullet j}}=\frac{n_{kj}}{\sum\limits_{i=1}^r n_{ij}}, \quad k = 1, \ldots, c,$$
+
+- Perfil columna:
+
+
+$$\begin{equation}
+\left( \begin{array}{c}
+p_{1j}\\p_{2j} \\ \vdots\\ p_{rj}
+\end{array}\right)
+\end{equation}$$
+
+
+???
+
+
+---
+
+class: large
+
+# Masas
+
+- Son las frecuencias relativas marginales
+
+- Masa fila $i$:
+
+$$m_{i \bullet } = f_{i \bullet } = \frac{n_{i \bullet }}{n_{\bullet  \bullet }} = \frac{\sum\limits_{j=1}^c n_{ij}}{\sum\limits_i\sum\limits_j n_{ij}}$$
+  
+- Masa columna $j$:
+
+$$m_{j \bullet } = f_{\bullet j} = \frac{n_{\bullet j}}{n_{\bullet  \bullet }} = \frac{\sum\limits_{i=1}^r n_{ij}}{\sum\limits_i\sum\limits_j n_{ij}}$$
+
+
+    
+???
+
+
+---
+
+class: large
+
+# Distancia chi-cuadrado
+
+- Distancias entre categorías del mismo atributo
+
+- Entre dos categorías $i$ e $i^\prime$ del atributo fila:
+
+$$d_{ii^\prime} = \sum\limits_{k=1}^c\frac{(p_{ik} - p_{i^\prime k})^2}{m_{\bullet k}}$$
+
+- Entre dos categorías $j$ y $j^\prime$ del atributo columna:
+
+$$d_{jj^\prime} = \sum\limits_{k=1}^r\frac{(p_{kj} - p_{kj^\prime})^2}{m_{k \bullet }}$$
+
+???
+
+
+---
+
+class: large
+
+# Matriz de discrepancias
+
+- Para calcular coordenadas, vamos a descomponer la matriz de discrepancias en
+valores singulares. 
+
+- Elemento típico matriz de discrepancias $C$:
+
+$$c_{ij} = \frac{n_{ij} - E_{ij}}{\sqrt{E_{ij}}}$$
+
+- La descomposición que vamos a hacer de la matriz $C$ es la siguiente:
+
+$$C = UDV^t$$  
+
+
+- Esta descomposición nos proporciona el **porcentaje que explica** cada
+dimensión y las **coordenadas** de los niveles de cada atributo
+
+???
+
+
+
+---
+
+class: large
+
+# Análisis de correspondencia con R
+
+- Paquete `ca` y función `ca`. 
+  - Primer argumento tabla o fórmula (+ argumento data)
+  - Segundo argumento `nd`, número de dimensiones a retener
+
+- Paquete `FactoMineR`, función `CA`
+
+- Resultado:
+  - $\min\{(c-1), (r-1)\}$ Dimensiones 
+  - Masas: frecuencias relativas marginales
+  - Distancias: al centroide (media ponderada todas las coordenadas)
+  - Inercias: porcentaje explicado por cada dimensión (masa por distancia al cuadrado)
+  - Coordenadas
+
+???
+
+
+---
+
+class: large, bottom, center, practice
+background-image: url(img/practice.png)
+background-position: 50% -10%
+background-size: 60%
+
+# Práctica
+
+Sigue el guión del material descargado de github
+
+
+
+
+
+
+---
+
+class: middle, center, toc
+
+# Análisis de correspondencias múltiple
+
+???
+
+
+---
+
+class: large
+
+# Análisis de correspondencias múltiple
+
+- Más de dos atributos
+
+- Tablas de frecuencias de más de dos dimensiones
+
+- Buscaremos igualmente la representación en dos dimensiones
+
+- A través de una matriz indicadora
+
+
+
+???
+
+
+---
+
+class: large
+
+# Matriz indicadora
+
+$$\begin{array}{cccc}\phantom{Observación 1}&\text{Atributo } A\;\; &\text{Atributo } B\;\; &\text{Atributo } C\end{array}
+\\
+\begin{array}{cccc|ccc|ccc}\phantom{Observación 1}& A_1 & A_2 & A_3 & B_1 & B_2 & B_3 & C_1 & C_2 & C_3\end{array}
+\\
+\begin{array}{c}\text{Observación } 1\\
+\text{Observación } 2\\
+\cdots\\
+\text{Observación } i\\
+\cdots\\
+\text{Observación } N\end{array}
+\left ( \begin{array}{ccc|ccc|ccc}
+0&0&1 & 0&1&0 & 1&0&0\\
+0&1&0 & 0&0&1 & 0&0&1\\
+\cdots&\cdots&\cdots & \cdots&\cdots&\cdots & \cdots&\cdots&\cdots\\
+0&0&1 & 0&1&0 & 1&0&0\\
+\cdots&\cdots&\cdots & \cdots&\cdots&\cdots & \cdots&\cdots&\cdots\\
+0&0&1 & 0&1&0 & 1&0&0\end{array} \right )$$
+
+???
+
+
+---
+
+class: large
+
+# Matriz de Burt
+
+- Matriz indicadora:
+
+$$Z = \lfloor Z_1, Z_2, \ldots, Z_j, \ldots, Z_p \rfloor $$
+
+- Matriz de Burt:
+
+$$B = Z^t Z$$
+
+- Análisis con autovalores y autovectores de la matriz de Burt
+???
+
+
+---
+
+class: large
+
+# Análisis de correspondencias con R
+
+- Función `mjca` paquete `ca`
+
+- Función `MCA` paquete `FactoMineR`
+
+???
+
+
+---
+
+class: large, bottom, center, practice
+background-image: url(img/practice.png)
+background-position: 50% -10%
+background-size: 60%
+
+# Práctica
+
+Sigue el guión del material descargado de github
+
+
+
+---
+class: inverse, middle, center
+
+# Gracias por la atención
+
+http://blog.uclm.es/emiliolcano
+
+
