@@ -68,7 +68,13 @@ class: middle, toc
 ???
 
 
+---
 
+class: middle, center, toc
+
+# Datos de atributos (¿o no?)
+
+???
 
 ---
 
@@ -293,9 +299,18 @@ background-size: 60%
 
 Visualización avanzada
 
+
 ---
 
 class: middle, center, toc
+
+# Visualización impactante y dinámica
+
+???
+
+---
+
+class: large
 
 # Visualización impactante y dinámica
 
