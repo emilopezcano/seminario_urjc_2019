@@ -3,14 +3,14 @@ title: "Visualización avanzada para análisis de correspondencias con R"
 author: "Emilio López cano"
 date: "2019-05-23"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "..")
 ```
-
-Visualización avanzada para análisis de correspondencias con R
-===================================================================
 
 
 III Seminario Análisis de datos avanzados en Ciencias de la Salud, 
@@ -41,14 +41,402 @@ las instrucciones y los archivos de instalación en las siguientes direcciones:
 Después de instalar R y RStudio, descarga y descomprime el siguiente fichero, que contiene
 el proyecto de RStudio que usaremos en esta sesión:
 
-http://emilio.lcano.com/data/urjc/seminario_urjc_2019.zip
+http://emilio.lcano.com/data/urjc/seminario_urjc_2019_project.zip
 
-Abre el proyecto de RStudio en tu equipo. Descomprime el fichero de datos:
+Abre el proyecto de RStudio en tu equipo (extensión .RProj). 
+Una vez abierto el proyecto, descomprime el fichero de datos que contiene:
 
 ```{r eval=FALSE}
 unzip("datos.zip")
 ```
 
-## Exploración de los datos
+## Análisis exploratorio
+
+El fichero de datos que vamos a utilizar se encuentra en formato "rds", que
+es propio de R. Para importarlo al espacio de trabajo, utilizamos la
+función `readRDS`, y lo asignamos al nombre de objeto `ansiedad` (es
+arbitrario, se puede poner cualquiera y luego utilizarlo siempre).
+
+```{r}
+ansiedad <- readRDS("mass.rds")
+```
+
+Este fichero contiene los resultados de un encuesta de la escala de ansiedad
+matemática aplicada a 20 estudiantes de un curso de estadística. Los datos
+se encuentran también en el paquete `likert` de R, y están descritos en:
+
+> Bai, H., Wang, L., Pan, W., & Frey, M. (2009). Measuring mathematics anxiety: Psychometric analysis of a bidimensional affective scale. Journal of | Instructional Psychology, 36 (3), 185- 193.
+
+Podemos ver en el explorador del environment que consta de 20 observaciones 
+y 15 variables. Estas variables son 14 respuestas a preguntas en escala likert
+y una variable más para el sexo.
+
+Podemos obtener tablas de frecuencias individuales y de doble entrada con
+la función `table`. Esta función espera vectores de datos, por lo que
+le pasamos las columnas de la tabla.
+
+```{r}
+table(ansiedad$Gender)
+table(ansiedad$`I find math interesting.`, ansiedad$Gender)
+```
+
+Gráficamente, podemos representar las tablas de frecuencias con 
+gráficos de mosaico, en los cuales el área de los rectángulos
+es proporcional a las frecuencias. En este caso utilizamos la
+sintaxis de fórmula, a la izquierda del símbolo `~` la variable
+del eje vertical, y a la derecha la variable del eje horizontal.
+
+```{r}
+mosaicplot(Gender ~ `I find math interesting.`, data = ansiedad, las = 1)
+```
+
+Otra representación, un poco más completa, la conseguimos con el 
+paquete `gplots`. La función `balloonplot` que realiza esta
+representación, requiere que le pasemos directamente la tabla
+de frecuencias, por lo que primero la guardamos en el espacio
+de trabajo.
+
+```{r, message=FALSE}
+freqs <- table(ansiedad$`I find math interesting.`, ansiedad$`Mathematics makes me feel nervous.`)
+library(gplots)
+balloonplot(freqs, label = FALSE, show.margins = FALSE, ylab = "Interesantes",
+            xlab = "Nervios",
+            main = "Interesantes vs. nervioso")
+```
+
+Existen varias opciones para añadir las frecuencias, marginales, etc.
+
+Una vez explorados los datos, podemos realizar pruebas de asociación para los
+atributos. El método más usual es el test de la Chi-cuadrado. La función
+`chisq.test` hace este trabajo en R. Podemos pasarle a la función tanto
+la tabla de frecuencias, como los vectores de datos originales.
+
+```{r}
+chisq.test(freqs)
+```
+
+```{r}
+chisq.test(ansiedad$`I get uptight during math tests.`, ansiedad$Gender)
+```
+
+Nótese que se obtiene una advertencia debido a que hay muchos ceros en la tabla.
+Para que el test sea válido, deberíamos tener al menos una frecuencia de 5 en cada
+cruce. En ocasiones esto se consigue uniendo categorías (por ejemplo, reducir de cinco a tres).
+En principio, podemos ver que la rigidez y el sexo están relacionados.
+
+## Modelo de análisis de correspondencias y datos obtenidos
+
+La instalación `base` de R tiene una función para realizar análisis de correpondencias
+(`ca`). No obstante, vamos a utilizar directamente el paquete `FactoMineR`, ya que ofrece muchas más posibilidades.
+Sobre todo, combinado con funciones de visualización del paquete `factoextra`.
+
+La función `CA` puede recibir como primer argumento el data frame con todos los datos, o la tabla de frecuencias de los
+dos atributos para los que queremos realizar el análisis. La función admite otros
+argumentos, como `ncp` (por defecto 5, dimensiones que se mantienen), si queremos 
+obtener el gráfico (`graph`), los pesos de cada observación (`row.w`, muy útil cuando
+trabajamos con metadatos o encuestas ya _cocinadas_). Por otra parte,
+se le pueden proporcionar variables suplementarias, tanto cualitativas
+como cuantitativas.
+
+Vamos a hacer el análisis para
+dos atributos. Guardamos el resultado en el objeto
+`analisis`, indicando que no devuelva el gráfico ya que utilizaremos para
+ello otro paquete.
+
+```{r, message=FALSE}
+ansiedad.1 <- table(ansiedad$`I get uptight during math tests.`, ansiedad$`Math is one of my favorite subjects.`)
+
+library(FactoMineR)
+analisis <- CA(ansiedad.1, graph = FALSE)
+analisis
+```
+
+Como vemos, la salida del objeto solamente nos indica la estructura del objeto. 
+Es una lista de 12 elementos, que realmente son 5, tres de ellos a su vez
+son listas. Podremos acceder a cualquiera de estos elementos
+con posterioridad, por ejemplo para hacer gráficos más avanzados.
+Para ver los resultados del análisis, utilizamos la función `summary`:
+
+```{r}
+summary(analisis)
+```
+
+Vemos que lo primero que nos devuelve el análisis, es la prueba chi-cuadrado, por 
+lo que podríamos ir directamente a este análisis sin hacer el anterior.
+Vemos que el p-valor es moderadamente pequeño (entre 0.01 y 0.05), por lo que
+puede haber asociación. Siempre con las reservas de que son muy pocos datos.
+
+A continuación se muestran los autovalores de la matriz de discrepancias,
+que es la herramienta matemática que utilizamos para determinar las dimensiones
+finales. La idea del análisis de correspondencias, es reducir un espacio multidimensional
+en otro, idealmente, bidimensional. Vemos que de un total de 4 posibles dimensiones,
+con las dos primeras se explica un 87.8% de la varianza, que es bastante aceptable.
+No obstante veremos un método gráfico a más adelante. Estos autovalores se corresponden
+con la inercia total de la dimensión.
+
+A continuación, para las tres primeras dimensiones (por defecto) se muestran
+los datos para cada categoría fila y columna:
+
+- Inercias (multiplicadas por 1000), es decir, contribución de la categoría a la inercia total de la dimensión
+- Coordenadas en la dimensión (es lo que nos permitirá visualizar las relaciones)
+- Contribución de cada categoría a la definición de la dimensión (en porcentaje)
+- Medida de la calidad de dicha contribución (cos2). Cuanto más próximo a 1, mejor representada está la categoría en el mapa perceptual.
+
+## Visualización de resultados
+
+Como hemos dicho, vamos a utilizar el paquete `factoextra` que produce gráficos
+más elegantes.
+
+### Gráficos de diagnóstico
+
+En primer lugar, podemos obtener un gráfico de sedimentación para ver si dos
+componentes son suficientes para explicar los datos.
+
+
+```{r, message=FALSE}
+library(factoextra)
+fviz_screeplot(analisis, addlabels = TRUE, ylim = c(0, 50))
+```
+
+Un criterio para decidir qué dimensiones son adecuadas, es considerar aquellas
+que contribuyan más que si la varianza se repartiera de forma unirorme, es decir,
+para cuatro posibles dimensiones, le correspondería 1/4 = 25% a cada una.
+Podemos añadir una línea al gráfico para visualizarlo.
+
+```{r}
+fviz_screeplot(analisis, addlabels = TRUE, ylim = c(0, 50)) +
+ geom_hline(yintercept=25, linetype=2, color="red")
+```
+
+Con lo que vemos que las dos primeras dimensiones son adecuadas.
+
+#### Análisis de las categorías "fila"
+
+Vamos a visualizar los distintos componentes que mostraba el `summary`
+del análisis y a interpretar los gráficos. La medida `cos2` nos 
+indica la calidad de la representación. Aquí debemos fijarnos
+en que si hay valores con dicho valor para las dos primeras componentes 
+muy bajo, debemos tomar con cautela su posición con respecto al resto
+de categorías. la función `fviz_cos2` nos sirve para este cometido
+
+```{r}
+fviz_cos2(analisis, choice = "row", axes = 1:2)
+```
+
+Si queremos ver por separado para cada dimensión, podemos utilizar la función
+`corrplot` del paquete homónimo.
+
+```{r, message=0}
+library(corrplot)
+corrplot(get_ca_row(analisis)$cos2, is.corr=FALSE)
+```
+
+Vemos cómo no hay ninguna categoría mal representada en el conjunto
+de las dos primeras dimensiones. La que menos, en todo caso, "Agree".
+Del mismo modo, podemos visualizar las contribuciones de cada categoría
+a cada dimensión.
+
+```{r, message=0}
+library(corrplot)
+corrplot(get_ca_row(analisis)$contrib, is.corr=FALSE)
+```
+
+Esta información también la podemos visualizar con gráficos de barras,
+incluso con un umbral para intentar darle significado a las dimensiones,
+según las categorías que más contribuyan.
+
+```{r, message=FALSE, fig.height=4}
+library(gridExtra)
+p1 <- fviz_contrib(analisis, choice = "row", axes = 1, top = 10)
+# Contributions of rows to dimension 2
+p2 <- fviz_contrib(analisis, choice = "row", axes = 2, top = 10)
+grid.arrange(p1, p2, nrow = 1)
+```
+
+Fnalmente, podemos realizar un gráfico de dispersión a lo largo de las dimensiones
+obtenidas, tanto de la contribución como de `cos2`, con un gradiente de
+color representando la magnitud de una de estas métricas, y una transparencia para la otra.
+También se pueden hacer por separado (por color para cos2 y por color para contrib).
+
+```{r, message=FALSE, fig.height=5}
+fviz_ca_row(analisis, col.row = "contrib", 
+                  alpha.row = "cos2",
+                  gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+                  repel = TRUE)
+```
+
+La opción `gradient.cols` nos sirve para definir la escala de colores, mientras
+que `repel` indica si las etiquetas deben "repelerse" para que no se oculten
+unas a otras. Esta opción puede resultar muy costosa computancionalmente.
+
+
+#### Análisis de las categorías columnas
+
+El análisis es análogo, por lo que se muestran a continuación el código y los
+gráficos para comentar en el aula. Nótese como hay que canbiar en cada caso,
+o el nombre de la función, o algún argumento utilizado en la misma, para referirnos
+a columnas en vez de filas.
+
+Calidad de representación:
+
+```{r}
+fviz_cos2(analisis, choice = "col", axes = 1:2)
+```
+
+
+```{r, message=0}
+corrplot(get_ca_col(analisis)$cos2, is.corr=FALSE)
+```
+
+Contribución: 
+
+```{r, message=0}
+corrplot(get_ca_col(analisis)$contrib, is.corr=FALSE)
+```
+
+
+```{r, message=FALSE, fig.height=4}
+p1 <- fviz_contrib(analisis, choice = "col", axes = 1, top = 10)
+# Contributions of rows to dimension 2
+p2 <- fviz_contrib(analisis, choice = "col", axes = 2, top = 10)
+grid.arrange(p1, p2, nrow = 1)
+```
+
+
+```{r, message=FALSE, fig.height=5}
+fviz_ca_col(analisis, col.col = "contrib", 
+                  alpha.col = "cos2",
+                  gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"), 
+                  repel = TRUE)
+```
+
+### Mapa perceptual
+
+Por último, y aunque muchas veces es lo primero que se hace, el principal
+resultado gráfico del análisis de correspondencias es el _biplot_ o mapa
+perceptual, donde representamos conjuntamente las categorías de los dos
+atributos que estamos analizando.
+
+```{r}
+fviz_ca_biplot(analisis, repel = TRUE)
+```
+
+El color azul representa las categorías fila, y el rojo, las categorías columna.
+Recordemos que las filas son las categorías para "I get uptight during math tests" y las
+columnas para "Math is one of my favorite subjects" Algunos patrones parecen
+claros (y lógicos). No obstante, en este gráfico cada atributo está representado
+en su propia dimensión. Para poder interpretar las distancias entre atributos,
+hay que visualizar el biplot "asimétrico", mediante el argumento `map`. El 
+siguiente código crea el biplot asimétrico en la escala de las filas con las 
+típicas flechas en vez de puntos.
+
+
+```{r}
+fviz_ca_biplot(analisis, 
+               map = "rowprincipal", 
+               arrows = c(TRUE, TRUE),
+               repel = TRUE)
+```
+
+Si el ángulo entre dos flechas de distinto atributo es muy agudo, hay una
+asociación fuerte entre la categoría fila y columna. Podemos obtener un 
+resumen de las coordenadas para intentar describir las dimensiones con la
+función `dimdesc`.
+
+```{r}
+dimdesc(analisis, axes = 1:2)
+```
+
+### Elementos suplementarios
+
+Podemos incluir en las visualizaciones elementos suplementarios
+no utilizados en la generación de las dimensiones. Por ejemplo,
+podemos situar las categorías del atributo "sexo" en las dimensiones
+creadas por los dos atributos que hemos analizado. Esto nos daría una
+especie de predicción de dónde se situaría una persona de un sexo determinado.
+Para ello, tenemos que tener una tabla de frecuencias ampliada, añadiendo
+por ejemplo nuevas columnas con las frecuencias de las categorías suplementarias.
+Por ejenplo unimos la tabla de frecuencias que teníamos con la tabla de frecuencias
+del primer atributo con el sexo:
+
+```{r}
+ansiedad.1
+ansiedad.2 <- table(ansiedad$`I get uptight during math tests.`, ansiedad$Gender)
+ansiedad.3 <- cbind(ansiedad.1, ansiedad.2)
+```
+
+Ahora podemos indicar en el análisis de correspondencias, que las dos últimas
+columnas son categorías suplementarias:
+
+```{r}
+analisis.2 <- CA(ansiedad.3, col.sup =  6:7, graph = FALSE)
+```
+
+Y ahora podemos obtener la representación de este nuevo atributo en los gráficos de dispersión de filas y en los biplot:
+
+```{r}
+fviz_ca_biplot(analisis.2, repel = TRUE)
+```
+
+¿Quién lo tiene más claro?
+
+De manera análoga se podría hacer con categorías suplementarias en filas.
+
+
+# Visualización impactante y dinámica
+
+Para terminar, vamos a representar los datos del análisis
+creando un gráfico interactivo con el paquete `plotly`.
+Estos gráficos se generan en formato html y son adecuados para publicar
+en web, pero también se pueden incorporar a presentaciones html para mostrar
+resultados en congresos, presentaciones de trabajos académicos, etc.
+Primero tenemos que preparar los datos.
+
+```{r, message=FALSE, warning=FALSE}
+gdata <- data.frame(item = "Tenso", 
+                    respuesta = rownames(analisis$row$coord),
+                    analisis$row$coord[, 1:2], 
+                    cos2 = rowSums(analisis$row$cos2[, 1:2]),
+                    contrib =rowSums(analisis$row$contrib[, 1:2]))
+gdata <- rbind(gdata, 
+               data.frame(item = "Favorita", 
+                          respuesta = rownames(analisis$col$coord),
+                          analisis$col$coord[, 1:2],  
+                          cos2 = rowSums(analisis$col$cos2[, 1:2]),
+                          contrib =rowSums(analisis$col$contrib[, 1:2])))
+
+
+library(plotly)
+plot_ly(gdata, 
+        type = "scatter", 
+        x = ~Dim.1, 
+        y = ~Dim.2, mode = "text",
+        text = ~respuesta,
+        color = ~item)
+```
+
+
+
+Si dispusiéramos de datos longitudinales, con el gráfico anterior 
+podríamos crear una animación fácilmente,
+al estilo de la siguiente: https://plot.ly/r/animations/#mulitple-trace-animations.
+
+Por ejemplo, imaginemos que esta encuesta se pasa en cada edición del curso al que
+hace referencia. Podríamos ver la evolución de las relaciones con el tiempo.
+Tendríamos que agrupar todos los análisis en un dataframe, y tener una variable
+con el año.
+
+
+
+
+
+Algunas cuestiones finales:
+
+- El paquete `Factoshiny` permite el análisis y visualización con el paquete
+`FactoMineR` de forma interactiva (probar si da tiempo).
+
+- Todas las visualizaciones se pueden incorporar en ficheros Rmarkdown para
+una investigación reproducible.
+
 
 
