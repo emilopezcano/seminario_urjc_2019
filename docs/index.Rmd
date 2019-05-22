@@ -38,17 +38,19 @@ las instrucciones y los archivos de instalación en las siguientes direcciones:
 - http://www.rstudio.com
 
 
-Después de instalar R y RStudio, descarga y descomprime el siguiente fichero, que contiene
-el proyecto de RStudio que usaremos en esta sesión:
+Después de instalar R y RStudio, crea un proyecto de RStudio.
+A continuación descarga el [fichero de datos](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds) y el [fichero de código](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds).
+Puedes hacerlo automáticamente con el siguiente código desde RStudio:
 
-http://emilio.lcano.com/data/urjc/seminario_urjc_2019_project.zip
-
-Abre el proyecto de RStudio en tu equipo (extensión .RProj). 
-Una vez abierto el proyecto, descomprime el fichero de datos que contiene:
-
-```{r eval=FALSE}
-unzip("datos.zip")
+```{r}
+download.file("https://raw.githubusercontent.com/emilopezcano/seminario_urjc_2019/master/docs/codigo_seminario.R", "codigo_seminario.R")
+download.file("https://emilopezcano.github.io/seminario_urjc_2019/mass.rds", "mass.rds")
 ```
+
+Comprueba que tienes un fichero con extensión .R y otro con extensión .rds
+en el directorio de trabajo. Abre el fichero codigo_seminario.R. 
+Puedes ir ejecutando el código línea a línea a medida que se avance en la 
+sesión.
 
 ## Análisis exploratorio
 
@@ -61,7 +63,7 @@ arbitrario, se puede poner cualquiera y luego utilizarlo siempre).
 ansiedad <- readRDS("mass.rds")
 ```
 
-Este fichero contiene los resultados de un encuesta de la escala de ansiedad
+Este fichero contiene los resultados de una encuesta de la escala de ansiedad
 matemática aplicada a 20 estudiantes de un curso de estadística. Los datos
 se encuentran también en el paquete `likert` de R, y están descritos en:
 
