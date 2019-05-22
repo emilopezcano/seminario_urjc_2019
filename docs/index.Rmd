@@ -19,7 +19,7 @@ Campus de Alcorcón.
 
 Sesión impartida por Emilio López Cano, 23 de mayo de 2019
 
-Las diapositivas del seminario se encuentran en: https://emilopezcano.github.io/seminario_urjc_2019/slides
+Las diapositivas del seminario se encuentran en: https://emilopezcano.github.io/seminario_urjc_2019/slides.html
 
 Más ejemplos y explicaciones en mi libro de apuntes [Análisis de datos con R](http://emilio.lcano.com/b/adr/) (licencia CC).
 
@@ -41,9 +41,14 @@ las instrucciones y los archivos de instalación en las siguientes direcciones:
 Después de instalar R y RStudio, descarga y descomprime el siguiente fichero, que contiene
 el proyecto de RStudio que usaremos en esta sesión:
 
+http://emilio.lcano.com/data/urjc/seminario_urjc_2019.zip
 
 Abre el proyecto de RStudio en tu equipo. Descomprime el fichero de datos:
 
 ```{r eval=FALSE}
 unzip("datos.zip")
 ```
+
+## Exploración de los datos
+
+
