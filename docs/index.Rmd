@@ -30,13 +30,19 @@ Todo el material en: https://emilopezcano.github.io/seminario_urjc_2019/
 Preparando el entorno
 ---------------------
 
-Descarga e instala R y RStudio en tu sistema, y en ese orden. Puedes encontrar
+En los ordenadores del aula el software ya está instalado, así como los
+paquetes de R que vamos a usar. Si utilizas tu portátil,
+descarga e instala R y RStudio en tu sistema, y en ese orden. Puedes encontrar
 las instrucciones y los archivos de instalación en las siguientes direcciones:
 
 - http://www.r-project.org
 
 - http://www.rstudio.com
 
+En cuanto a los paquetes, si al ejecutar alguna expresión que contenga
+la función `library` obtienes un error, debes instalar el paquete
+que se intenta cargar con la función `install.packages`, o bien con el instalador
+de paquetes de RStudio.
 
 Después de instalar R y RStudio, crea un proyecto de RStudio.
 A continuación descarga el [fichero de datos](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds) y el [fichero de código](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds).
