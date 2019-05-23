@@ -5,6 +5,8 @@ date: "2019-05-23"
 output: html_document
 editor_options: 
   chunk_output_type: console
+params:
+  dl: FALSE
 ---
 
 ```{r setup, include=FALSE}
@@ -48,7 +50,7 @@ Después de instalar R y RStudio, crea un proyecto de RStudio.
 A continuación descarga el [fichero de datos](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds) y el [fichero de código](https://emilopezcano.github.io/seminario_urjc_2019/mass.rds).
 Puedes hacerlo automáticamente con el siguiente código desde RStudio:
 
-```{r}
+```{r, eval=params$dl}
 download.file("https://raw.githubusercontent.com/emilopezcano/seminario_urjc_2019/master/docs/codigo_seminario.R", "codigo_seminario.R")
 download.file("https://emilopezcano.github.io/seminario_urjc_2019/mass.rds", "mass.rds")
 ```
@@ -390,6 +392,66 @@ fviz_ca_biplot(analisis.2, repel = TRUE)
 
 De manera análoga se podría hacer con categorías suplementarias en filas.
 
+# Análisis de correspondencias múltiples
+
+En los apartados anteriores, hemos seleccionado dos de los atributos para estudiar
+su relación. Es lo que llamamos análisis de correspondencias simple. El análisis
+de correspondencias múltiples nos permite estudiar la relación entre múltiples
+atributos. A medida que aumentamos el número de atributos, aumenta la complejidad,
+y la interpretación se complica. No obstante, el método es similar. Además, la visualización
+de muchos niveles de atributos se hace a veces complicado (o imposible), por lo que
+hay primero que adaptar las etiquetas para que se puedan leer en los gráficos.
+Vamos a realizar el análisis de correspondencias múltiples para nuestros datos.
+Primero transformamos los nombres de atributos (preguntas) y niveles (respuestas)
+para que sean más cortos.
+
+```{r}
+colnames(ansiedad) <- c("G", "interesting", "uptight", "future", "blank", "life",
+                        "worry", "sink", "challenging", "nervous", "more", 
+                        "uneasy", "favorite", "enjoy", "confused")
+for(i in 2:15){
+  levels(ansiedad[, i]) <- 1:5
+}
+levels(ansiedad$G) <- c("F", "M")
+```
+
+Ahora ajustamos el modelo con la función `MCA`.
+
+```{r}
+analisis.3 <- MCA(ansiedad, graph = FALSE)
+analisis.3
+```
+
+Vemos que el objeto tiene los mismos elementos que el análisis simple.
+
+```{r}
+summary(analisis.3)
+```
+
+Sin embargo es muy raro que se consiga explicar mucha varianza solo con dos dimensiones.
+
+```{r, fig.width=10, fig.height=10, out.width="100%"}
+fviz_mca_biplot(analisis.3, repel = TRUE)
+```
+
+Nótese cómo por defecto para este análisis se muestran también las posiciones
+de los individuos (en azul). 
+
+Podemos visualizar solo los individuos:
+
+```{r}
+fviz_mca_ind(analisis.3, repel = TRUE)
+```
+
+Podemos visualizar solamente las variables para ver su proximidad.
+
+
+```{r}
+fviz_mca_var(analisis.3, choice = "var", repel = TRUE)
+```
+
+A partir de los datos almacenados en el objeto, podemos realizar cualquier
+visualización utilizando las herramientas gráficas de R.
 
 # Visualización impactante y dinámica
 

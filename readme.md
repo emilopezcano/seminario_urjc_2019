@@ -8,7 +8,7 @@ Campus de Alcorcón.
 
 Sesión impartida por Emilio López Cano, 23 de mayo de 2019
 
-Las diapositivas del seminario se encuentran en: https://emilopezcano.github.io/seminario_urjc_2019/slides
+Las diapositivas del seminario se encuentran en: https://emilopezcano.github.io/seminario_urjc_2019/slides.html
 
 Más ejemplos y explicaciones en mi libro de apuntes [Análisis de datos con R](http://emilio.lcano.com/b/adr/) (licencia CC)
 
