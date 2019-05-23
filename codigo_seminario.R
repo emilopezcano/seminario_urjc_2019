@@ -1,10 +1,14 @@
+params <-
+list(dl = FALSE)
+
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
 knitr::opts_knit$set(root.dir = "..")
 
 
-## ----eval=FALSE----------------------------------------------------------
-## unzip("datos.zip")
+## ---- eval=params$dl-----------------------------------------------------
+## download.file("https://raw.githubusercontent.com/emilopezcano/seminario_urjc_2019/master/docs/codigo_seminario.R", "codigo_seminario.R")
+## download.file("https://emilopezcano.github.io/seminario_urjc_2019/mass.rds", "mass.rds")
 
 
 ## ------------------------------------------------------------------------
@@ -14,6 +18,10 @@ ansiedad <- readRDS("mass.rds")
 ## ------------------------------------------------------------------------
 table(ansiedad$Gender)
 table(ansiedad$`I find math interesting.`, ansiedad$Gender)
+
+
+## ------------------------------------------------------------------------
+barplot(table(ansiedad$`I find math interesting.`), las = 2)
 
 
 ## ------------------------------------------------------------------------
@@ -140,6 +148,37 @@ analisis.2 <- CA(ansiedad.3, col.sup =  6:7, graph = FALSE)
 
 ## ------------------------------------------------------------------------
 fviz_ca_biplot(analisis.2, repel = TRUE)
+
+
+## ------------------------------------------------------------------------
+colnames(ansiedad) <- c("G", "interesting", "uptight", "future", "blank", "life",
+                        "worry", "sink", "challenging", "nervous", "more", 
+                        "uneasy", "favorite", "enjoy", "confused")
+for(i in 2:15){
+  levels(ansiedad[, i]) <- 1:5
+}
+levels(ansiedad$G) <- c("F", "M")
+
+
+## ------------------------------------------------------------------------
+analisis.3 <- MCA(ansiedad, graph = FALSE)
+analisis.3
+
+
+## ------------------------------------------------------------------------
+summary(analisis.3)
+
+
+## ---- fig.width=10, fig.height=10, out.width="100%"----------------------
+fviz_mca_biplot(analisis.3, repel = TRUE)
+
+
+## ------------------------------------------------------------------------
+fviz_mca_ind(analisis.3, repel = TRUE)
+
+
+## ------------------------------------------------------------------------
+fviz_mca_var(analisis.3, choice = "var", repel = TRUE)
 
 
 ## ---- message=FALSE, warning=FALSE---------------------------------------

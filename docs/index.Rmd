@@ -2,7 +2,10 @@
 title: "Visualización avanzada para análisis de correspondencias con R"
 author: "Emilio López cano"
 date: "2019-05-23"
-output: html_document
+output: 
+  html_document: 
+    highlight: tango
+    theme: flatly
 editor_options: 
   chunk_output_type: console
 params:
@@ -10,7 +13,7 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
 knitr::opts_knit$set(root.dir = "..")
 ```
 
@@ -90,8 +93,21 @@ table(ansiedad$Gender)
 table(ansiedad$`I find math interesting.`, ansiedad$Gender)
 ```
 
-Gráficamente, podemos representar las tablas de frecuencias con 
-gráficos de mosaico, en los cuales el área de los rectángulos
+Gráficamente, podemos representar las tablas de frecuencias de un
+atributo con 
+gráficos de barras. En general, lo gráficos de sectores circulares no son
+aconsejables a menos que se incluyan las cifras exactas, ya que el ojo humano
+no distingue las diferencias de ángulos con la misma facilidad que la diferencia
+de alturas.
+
+```{r}
+barplot(table(ansiedad$`I find math interesting.`), las = 2)
+```
+
+
+
+Para más de un atributo, tenemos los gráficos de mosaico (más de un atributo), 
+en los cuales el área de los rectángulos
 es proporcional a las frecuencias. En este caso utilizamos la
 sintaxis de fórmula, a la izquierda del símbolo `~` la variable
 del eje vertical, y a la derecha la variable del eje horizontal.
